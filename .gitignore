@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+digest.html
+debug_*.png
+debug_*.html
