@@ -133,12 +133,15 @@ GitHub a la hora exacta para disparar el workflow. Esto SI llega a tiempo
 2. Un token de GitHub fine-grained (Settings -> Developer settings -> Personal
    access tokens -> Fine-grained tokens), scopeado SOLO a este repo, con el
    permiso "Actions: Read and write" (no necesita nada mas: no puede leer
-   codigo, tocar secrets ni hacer push). **Le pusimos 1 ano de expiracion a
-   proposito** — GitHub avisa por correo antes de que venza, para forzar que
-   alguien lo renueve activamente en vez de que el pipeline se apague en
-   silencio si queda huerfano. *(Ver fecha de vencimiento en el propio token,
-   en la seccion de tokens de GitHub del dueno de la cuenta.)*
-3. En cron-job.org, 3 cronjobs identicos salvo la hora y el body:
+   codigo, tocar secrets ni hacer push). El token actual **vence el 31 de
+   diciembre de 2026** (se le puso expiracion a proposito, en vez de "sin
+   vencimiento", para forzar una renovacion activa en vez de que el pipeline
+   se apague en silencio si el token queda huerfano). Antes de esa fecha,
+   alguien tiene que generar uno nuevo y actualizar los 3 cronjobs de
+   cron-job.org con el token nuevo.
+3. Ya esta armado en cron-job.org (cuenta de Joaquin) con 3 cronjobs, uno por
+   franja. Si hay que rehacerlos (token vencido, nueva cuenta, etc.), esta es
+   la config de cada uno:
 
    | Franja | Hora (Lima, lun-vie) | Hora (UTC) | Body |
    |---|---|---|---|
