@@ -1,15 +1,17 @@
 name: Hechos de importancia - 3x al dia
 
+# NOTA: este workflow ya NO usa 'schedule' (cron de GitHub) porque GitHub no
+# garantiza la hora de disparo de los cron y en la practica llegamos a ver
+# retrasos de 3 a 11 horas (peor en horas "en punto" como 12:00/17:00/21:00
+# UTC, que son las mas congestionadas). En su lugar, un servicio externo
+# (cron-job.org) llama a la API de GitHub a la hora exacta para disparar
+# workflow_dispatch con la franja correspondiente. Ver README.md para la
+# configuracion de esos 3 disparadores externos.
 on:
-  schedule:
-    # Los 3 horarios son de lunes a viernes, en hora de Lima (UTC-5, sin horario de verano):
-    - cron: "0 12 * * 1-5"  # 07:00 Lima -> manana:   hechos entre 16:01 de ayer y 07:00 de hoy
-    - cron: "0 17 * * 1-5"  # 12:00 Lima -> mediodia: hechos entre 07:01 y 12:00 de hoy
-    - cron: "0 21 * * 1-5"  # 16:00 Lima -> tarde:    hechos entre 12:01 y 16:00 de hoy
   workflow_dispatch:
     inputs:
       franja:
-        description: "Franja a correr manualmente (vacio = usa LOOKBACK_DIAS de config.py en vez de una franja horaria)"
+        description: "Franja a correr (vacio = usa LOOKBACK_DIAS de config.py en vez de una franja horaria)"
         type: choice
         default: ""
         options: ["", "manana", "mediodia", "tarde"]
@@ -29,19 +31,9 @@ jobs:
           pip install -r requirements.txt
           playwright install --with-deps chromium
 
-      - name: Determinar franja segun el cron que disparo el job
-        id: franja
-        run: |
-          case "${{ github.event.schedule }}" in
-            "0 12 * * 1-5") echo "valor=manana" >> "$GITHUB_OUTPUT" ;;
-            "0 17 * * 1-5") echo "valor=mediodia" >> "$GITHUB_OUTPUT" ;;
-            "0 21 * * 1-5") echo "valor=tarde" >> "$GITHUB_OUTPUT" ;;
-            *) echo "valor=${{ inputs.franja }}" >> "$GITHUB_OUTPUT" ;;
-          esac
-
       - name: Correr pipeline
         env:
-          FRANJA: ${{ steps.franja.outputs.valor }}
+          FRANJA: ${{ inputs.franja }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
