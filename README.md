@@ -173,11 +173,3 @@ cuentas/servicio del equipo (cambiar 2-3 valores, no requiere tocar codigo):
 - **Token de cron-job.org**: cuando venza (a 1 ano de creado) o si te vas antes,
   alguien tiene que generar uno nuevo (paso 2 arriba) y actualizar los 3
   cronjobs en cron-job.org.
-
-## Antes de ponerlo en produccion
-
-Valida con IT / compliance dos cosas: (1) que se puede hacer scraping
-automatizado del sitio de la SMV y mandar correos automaticos internos (suele
-estar bien porque el hecho de importancia es informacion publica), y (2) cual es
-el proveedor de LLM aprobado en Inteligo si no quieren que salga a la API publica
-de Anthropic.
