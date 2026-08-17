@@ -10,7 +10,8 @@ Correr:  python main.py
 
 Correr acotado a una franja horaria fija (para mandar 3 correos al dia sin
 repetir hechos entre uno y otro), con la env var FRANJA:
-  FRANJA=manana    python main.py   # hechos entre las 16:01 de ayer y las 07:00 de hoy
+  FRANJA=manana    python main.py   # hechos entre las 16:01 del ultimo dia habil y las 07:00 de hoy
+                                     # (el lunes retrocede hasta el viernes, cubre el finde)
   FRANJA=mediodia  python main.py   # hechos entre las 07:01 y las 12:00 de hoy
   FRANJA=tarde     python main.py   # hechos entre las 12:01 y las 16:00 de hoy
 Las franjas son siempre en hora de Lima, sin importar la zona horaria del
@@ -37,11 +38,21 @@ FRANJAS = {
 }
 
 
+def _dia_habil_anterior(fecha: dt.date) -> dt.date:
+    """Retrocede al ultimo dia habil (lun-vie) antes de 'fecha'. Un lunes
+    retrocede hasta el viernes, para que la franja 'manana' del lunes cubra
+    todo el fin de semana (nadie corre el pipeline sabado/domingo)."""
+    anterior = fecha - dt.timedelta(days=1)
+    while anterior.weekday() >= 5:  # 5=sabado, 6=domingo
+        anterior -= dt.timedelta(days=1)
+    return anterior
+
+
 def _ventana(franja: str, ahora: dt.datetime) -> tuple[dt.datetime, dt.datetime]:
     hora_ini, hora_fin = FRANJAS[franja]
     hoy = ahora.date()
     fin = dt.datetime.combine(hoy, hora_fin, tzinfo=TZ_LIMA)
-    dia_inicio = hoy - dt.timedelta(days=1) if hora_ini > hora_fin else hoy
+    dia_inicio = _dia_habil_anterior(hoy) if hora_ini > hora_fin else hoy
     inicio = dt.datetime.combine(dia_inicio, hora_ini, tzinfo=TZ_LIMA)
     return inicio, fin
 
