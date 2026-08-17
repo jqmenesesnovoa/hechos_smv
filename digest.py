@@ -17,10 +17,11 @@ def _ordenar(items: list[dict]) -> list[dict]:
 
 def render_texto(items: list[dict]) -> str:
     hoy = dt.date.today().strftime("%d/%m/%Y")
+    titulo = f"Hechos de Importancia SMV - {hoy}"
     if not items:
-        return f"Hechos de importancia - cobertura - {hoy}\n\nSin hechos nuevos hoy."
+        return f"{titulo}\n\nSin hechos nuevos hoy."
 
-    lineas = [f"Hechos de importancia - cobertura - {hoy}", ""]
+    lineas = [titulo, ""]
     tier_actual = None
     for it in _ordenar(items):
         if it["tier"] != tier_actual:
@@ -37,10 +38,10 @@ def render_texto(items: list[dict]) -> str:
     return "\n".join(lineas)
 
 
-def render_html(items: list[dict], titulo: bool = True) -> str:
+def render_html(items: list[dict]) -> str:
     hoy = dt.date.today().strftime("%d/%m/%Y")
     color = {1: "#A32D2D", 2: "#854F0B", 3: "#5F5E5A"}
-    out = [f"<h2>Hechos de importancia - cobertura - {hoy}</h2>"] if titulo else []
+    out = [f"<h2>Hechos de Importancia SMV - {hoy}</h2>"]
     if not items:
         out.append("<p>Sin hechos nuevos hoy.</p>")
         return "".join(out)
@@ -64,7 +65,7 @@ def render_html(items: list[dict], titulo: bool = True) -> str:
     return "".join(out)
 
 
-def entregar(items: list[dict]):
+def entregar(items: list[dict], hora_reporte: str | None = None):
     texto = render_texto(items)
     html = render_html(items)
 
@@ -75,17 +76,15 @@ def entregar(items: list[dict]):
     print("\n[ok] digest guardado en digest.html")
 
     if config.SMTP_HOST and config.EMAIL_TO:
-        # El Subject del correo ya trae el titulo/fecha, asi que el cuerpo va
-        # sin el <h2> repetido (que si se guarda en digest.html, para cuando
-        # se abre el archivo suelto sin ese contexto).
-        _enviar_correo(render_html(items, titulo=False))
+        _enviar_correo(html, hora_reporte)
         print(f"[ok] correo enviado a {', '.join(config.EMAIL_TO)}")
 
 
-def _enviar_correo(html: str):
+def _enviar_correo(html: str, hora_reporte: str | None = None):
     hoy = dt.date.today().strftime("%d/%m/%Y")
+    detalle = f"{hoy}, {hora_reporte}" if hora_reporte else hoy
     msg = MIMEText(html, "html", "utf-8")
-    msg["Subject"] = f"Hechos de importancia - cobertura - {hoy}"
+    msg["Subject"] = f"Atlas - Hechos de Importancia [{detalle}]"
     msg["From"] = config.EMAIL_FROM
     msg["To"] = ", ".join(config.EMAIL_TO)
     with smtplib.SMTP(config.SMTP_HOST, config.SMTP_PORT) as s:

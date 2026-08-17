@@ -37,6 +37,9 @@ FRANJAS = {
     "tarde": (dt.time(12, 1), dt.time(16, 0)),
 }
 
+# Como se muestra la franja en el asunto del correo (Atlas - Hechos de Importancia [fecha, hora])
+FRANJA_HORA = {"manana": "7am", "mediodia": "12pm", "tarde": "4pm"}
+
 
 def _dia_habil_anterior(fecha: dt.date) -> dt.date:
     """Retrocede al ultimo dia habil (lun-vie) antes de 'fecha'. Un lunes
@@ -69,6 +72,7 @@ def _momento_publicacion(hecho) -> dt.datetime | None:
 
 def run():
     franja = os.environ.get("FRANJA", "").strip().lower()
+    hora_reporte = FRANJA_HORA.get(franja)
 
     print("[1/4] Scrapeando hechos de la SMV...")
     if franja:
@@ -91,14 +95,14 @@ def run():
     print(f"      {len(de_cobertura)} hechos de empresas cubiertas.")
 
     if not de_cobertura:
-        digest.entregar([])
+        digest.entregar([], hora_reporte)
         return
 
     print("[3/4] Clasificando con IA...")
     clasificados = classifier.clasificar_todos(de_cobertura)
 
     print("[4/4] Armando digest...\n")
-    digest.entregar(clasificados)
+    digest.entregar(clasificados, hora_reporte)
 
 
 if __name__ == "__main__":
