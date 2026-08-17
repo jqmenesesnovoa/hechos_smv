@@ -37,10 +37,10 @@ def render_texto(items: list[dict]) -> str:
     return "\n".join(lineas)
 
 
-def render_html(items: list[dict]) -> str:
+def render_html(items: list[dict], titulo: bool = True) -> str:
     hoy = dt.date.today().strftime("%d/%m/%Y")
     color = {1: "#A32D2D", 2: "#854F0B", 3: "#5F5E5A"}
-    out = [f"<h2>Hechos de importancia - cobertura - {hoy}</h2>"]
+    out = [f"<h2>Hechos de importancia - cobertura - {hoy}</h2>"] if titulo else []
     if not items:
         out.append("<p>Sin hechos nuevos hoy.</p>")
         return "".join(out)
@@ -75,7 +75,10 @@ def entregar(items: list[dict]):
     print("\n[ok] digest guardado en digest.html")
 
     if config.SMTP_HOST and config.EMAIL_TO:
-        _enviar_correo(html)
+        # El Subject del correo ya trae el titulo/fecha, asi que el cuerpo va
+        # sin el <h2> repetido (que si se guarda en digest.html, para cuando
+        # se abre el archivo suelto sin ese contexto).
+        _enviar_correo(render_html(items, titulo=False))
         print(f"[ok] correo enviado a {', '.join(config.EMAIL_TO)}")
 
 
