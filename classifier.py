@@ -28,9 +28,15 @@ descripcion resumida del hecho, y un tier sugerido (1=alta, 2=media, 3=baja) \
 derivado del codigo.
 
 Devuelve SOLO un objeto JSON, sin texto adicional, sin markdown, con las claves:
-- "tier": entero 1, 2 o 3. Usa el tier sugerido salvo que el contenido del hecho \
-claramente amerite otro (ej: un hecho marcado "Otros" que en realidad anuncia un \
-cambio de control debe subir a tier 1).
+- "tier": entero 1, 2 o 3. Por defecto usa el tier sugerido. Solo cambialo si el \
+TEXTO de la descripcion evidencia claramente que el hecho es mas o menos material \
+de lo que el codigo sugiere (ej: un hecho marcado "Otros" que en el texto resulta \
+ser un anuncio de cambio de control debe subir a tier 1). \
+IMPORTANTE: la descripcion viene vacia o generica muy seguido, sobre todo en \
+reportes de resultados (L10) donde la empresa solo adjunta el PDF sin resumen en \
+texto - eso es normal y NO es evidencia de baja materialidad. Nunca bajes el tier \
+sugerido solo porque no hay texto que analizar; en ese caso, respeta el tier \
+sugerido tal cual.
 - "categoria": etiqueta corta en espanol (ej: "Dividendos", "Resultados", "M&A", \
 "Directorio", "Emision de deuda", "Litigios").
 - "resumen": 3 a 5 oraciones en espanol, en un solo parrafo, que CUENTEN que dice \
